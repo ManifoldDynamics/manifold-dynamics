@@ -1,0 +1,16 @@
+Metadata-Version: 2.4
+Name: manifold-engine
+Version: 0.1.0a0
+Summary: The Open Source Computational Geography Engine
+Home-page: https://github.com/ManifoldDynamics/manifold-dynamics
+Author: Manifold Dynamics (R&D Division of Praetor Defense)
+License: Apache 2.0
+Requires-Dist: numpy>=1.26.0
+Requires-Dist: scipy>=1.11.0
+Requires-Dist: gdal>=3.8.0
+Requires-Dist: matplotlib>=3.8.0
+Dynamic: author
+Dynamic: home-page
+Dynamic: license
+Dynamic: requires-dist
+Dynamic: summary
