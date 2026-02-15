@@ -2,6 +2,8 @@ import torch
 import torch.optim as optim
 import torch.nn.functional as F
 import sys
+import os
+import argparse
 from torch.utils.data import DataLoader
 from .topo_clip_encoder import TopoCLIP
 from .topo_clip_loss import InfoNCELoss
@@ -17,9 +19,13 @@ MOCK_TEXTS = [
 ]
 
 # --- TRAINING LOOP (Uses real data) ---
-def train_topo_clip(epochs=5, learning_rate=1e-4):
+def train_topo_clip(mft_path, epochs=5, learning_rate=1e-4):
     print("--- TOPOCLIP TRAINING SIMULATION STARTED ---")
     
+    if not os.path.exists(mft_path):
+        print(f"ERROR: MFT file not found at {mft_path}. Please run ingest.py first.")
+        return
+
     # 1. Initialization
     model = TopoCLIP()
     criterion = InfoNCELoss(temperature=0.07)
@@ -32,16 +38,10 @@ def train_topo_clip(epochs=5, learning_rate=1e-4):
     print(f"Model running on device: {device}")
     
     # 2. Data Setup (Loads real MFT tensor and creates training batches)
-    MFT_PATH = "data/processed/smokies.mft"
-    
-    if not os.path.exists(MFT_PATH):
-        print("ERROR: MFT file not found. Please run ingest.py first.")
-        return
-
-    topo_dataset = TopoClipDataset(MFT_PATH, MOCK_TEXTS)
+    topo_dataset = TopoClipDataset(mft_path, MOCK_TEXTS)
     data_loader = DataLoader(topo_dataset, batch_size=4, shuffle=True, num_workers=0)
     
-    print(f"Loaded {len(topo_dataset)} training patches from {MFT_PATH}.")
+    print(f"Loaded {len(topo_dataset)} training patches from {mft_path}.")
     
     # 3. Training Loop Iteration
     for epoch in range(epochs):
@@ -76,6 +76,14 @@ def train_topo_clip(epochs=5, learning_rate=1e-4):
         
     print("--- FULL SEMANTIC ENGINE ARCHITECTURE COMPLETE. ---")
 
+def main():
+    parser = argparse.ArgumentParser(description="Train TopoCLIP Model")
+    parser.add_argument("input", nargs='?', default="data/processed/smokies.mft", help="Path to input MFT file")
+    parser.add_argument("--epochs", type=int, default=5, help="Number of epochs")
+    parser.add_argument("--lr", type=float, default=1e-4, help="Learning rate")
+    args = parser.parse_args()
+
+    train_topo_clip(args.input, epochs=args.epochs, learning_rate=args.lr)
+
 if __name__ == "__main__":
-    import os
-    train_topo_clip()
+    main()

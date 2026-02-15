@@ -62,7 +62,7 @@ Please read:
 ```
 Raw DEM (GeoTIFF/ADF)
         ↓
-   ingest.py
+   manifold-ingest
         ↓
  ManifoldTensor (.mft)
    7 float32 channels
@@ -109,19 +109,31 @@ Full math:
 
 ### Install Requirements
 ```bash
-pip install -r requirements.txt
-pip install torch rasterio scipy napari matplotlib numpy transformers
+# Install the package in editable mode
+pip install -e .
+
+# To install test dependencies
+pip install -e .[test]
 ```
 
 ### Ingest a DEM → `.mft`
+You can use the CLI command:
+```bash
+manifold-ingest raw/smokies.tif data/processed/smokies.mft
+```
+Or use Python:
 ```python
-from ingest import ingest_geotiff
-ingest_geotiff("raw/smokies.tif", "data/processed/smokies.mft")
+from manifold.core.ingest import ingest_geotiff
+tensor = ingest_geotiff("raw/smokies.tif", "data/processed/smokies.mft")
 ```
 
-### Run Physics
+### Run Physics (KESM-Lite)
+```bash
+python -m manifold.physics.kesm data/processed/smokies.mft
+```
+Or via Python API:
 ```python
-from kesm import KESM_Lite
+from manifold.physics.kesm import KESM_Lite
 from manifold.core.io import ManifoldTensor
 
 t = ManifoldTensor.load("data/processed/smokies.mft")
@@ -130,9 +142,18 @@ stability = solver.compute_stability_index()
 ```
 
 ### Train TopoCLIP
+```bash
+python -m manifold.vision.topo_clip_train data/processed/smokies.mft --epochs 5
+```
+Or via Python API:
 ```python
-from topo_clip_train import train_topo_clip
-train_topo_clip(epochs=5)
+from manifold.vision.topo_clip_train import train_topo_clip
+train_topo_clip("data/processed/smokies.mft", epochs=5)
+```
+
+### Run Tests
+```bash
+pytest tests/
 ```
 
 ---
@@ -143,15 +164,16 @@ See full explanation:
 👉 [`docs/structure.md`](docs/structure.md)
 
 ```
-manifold/        # Core library
-vision/          # TopoCLIP
-physics/         # KESM + physical models
-cpp/             # C++ backend
-docs/            # Manuals, LaTeX, notebooks
-data/            # Raw + processed terrain
-tests/           # Pre-alpha tests
-view/            # Build artifacts
-x64/ Release/    # Windows binaries (temporary)
+manifold-dynamics/
+├── src/
+│   └── manifold/        # Core Python library
+│       ├── core/        # IO, Ingest, Geometry
+│       ├── physics/     # KESM + physical models
+│       └── vision/      # TopoCLIP + multimodal models
+├── tests/               # Test suite
+├── data/                # Raw + processed terrain
+├── docs/                # Manuals, LaTeX, notebooks
+└── pyproject.toml       # Project configuration
 ```
 
 ---
@@ -182,8 +204,7 @@ Please read:
 
 # 🔓 License
 
-**MIT License**  
-See [`LICENSE.md`](LICENSE.md)
+**Apache 2.0 / MIT** (See [`LICENSE`](LICENSE))
 
 ---
 
@@ -208,4 +229,3 @@ This is only the beginning — expect:
 
 Thanks to early testers, researchers, and geospatial communities providing  
 open DEMs and terrain datasets.
-

@@ -36,3 +36,8 @@ Makefile
 # IDE
 .vscode/
 .idea/
+
+# Distribution
+*.egg-info/
+dist/
+.pytest_cache/

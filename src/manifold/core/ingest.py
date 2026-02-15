@@ -1,4 +1,3 @@
-print("--- SCRIPT STARTED ---")
 import sys
 import os
 import argparse
@@ -190,15 +189,17 @@ def ingest_geotiff(input_path, output_path):
     print(f" -> Final Tensor Shape: Elevation + 6 Derived Channels.")
     print(f"[INGEST] Saving to {output_path}...")
     tensor.save(output_path)
+    return tensor
 
 def main():
-    parser = argparse.ArgumentParser()
-    parser.add_argument("input")
-    parser.add_argument("output")
+    parser = argparse.ArgumentParser(description="Ingest GeoTIFF into ManifoldTensor (.mft)")
+    parser.add_argument("input", help="Input GeoTIFF path")
+    parser.add_argument("output", help="Output .mft path")
     args = parser.parse_args()
     if not os.path.exists(args.input):
         print(f"Error: Could not find {args.input}")
-        return
+        sys.exit(1)
+
     ingest_geotiff(args.input, args.output)
 
 if __name__ == "__main__":
