@@ -2,7 +2,7 @@ import numpy as np
 from scipy.ndimage import laplace
 from manifold.core.io import ManifoldTensor
 import sys
-import napari
+import argparse
 
 class KESM_Lite:
     def __init__(self, tensor):
@@ -51,11 +51,12 @@ class KESM_Lite:
         
         return classification
 
-# --- MODULE TESTER (FINAL TUNING) ---
-if __name__ == "__main__":
-    path = "data/processed/smokies.mft"
-    if len(sys.argv) > 1: path = sys.argv[1]
-    
+def main():
+    parser = argparse.ArgumentParser(description="KESM-Lite: Cold Air Drainage Analysis")
+    parser.add_argument("input", nargs='?', default="data/processed/smokies.mft", help="Input MFT file path")
+    args = parser.parse_args()
+
+    path = args.input
     print(f"Loading {path}...")
     try:
         tensor = ManifoldTensor.load(path)
@@ -68,36 +69,42 @@ if __name__ == "__main__":
     stability = solver.compute_stability_index()
     
     # --- FINAL TUNING: WIDENED THRESHOLD (tau = 0.1) ---
-    # This value is a compromise between the overly sensitive 0.05 and the too-strict 0.5.
     TAU = 0.1 
     classification = solver.classify_terrain(stability, tau_pos=TAU, tau_neg=-TAU)
-    # ----------------------------------------------------
     
     # --- VISUALIZATION ---
-    viewer = napari.Viewer(title="KESM-Lite: Cold Air Drainage Analysis")
-    
-    # Layer 1: Terrain
-    viewer.add_image(tensor.elevation, name="Terrain", colormap="terrain")
-    
-    # Layer 2: Physics (The Flux Potential Heatmap)
-    # Contrast limits match the new classification threshold
-    viewer.add_image(
-        stability, 
-        name="Flux Potential (Laplacian)", 
-        colormap="coolwarm", 
-        opacity=0.6, 
-        contrast_limits=[-TAU, TAU] 
-    )
-    
-    # Layer 3: Classification (The discrete Blue Sinks / Red Peaks)
-    labels_layer = viewer.add_labels(
-        classification,
-        name="Classification",
-        opacity=0.5 
-    )
-    
-    # Set the colors explicitly
-    labels_layer.color = {1: 'blue', -1: 'red', 0: 'transparent'}
-    
-    print("Running Viewer. Check the Blue Areas (Frost Hollows) and Red Areas (Peaks).")
-    napari.run()
+    try:
+        import napari
+        viewer = napari.Viewer(title="KESM-Lite: Cold Air Drainage Analysis")
+
+        # Layer 1: Terrain
+        viewer.add_image(tensor.elevation, name="Terrain", colormap="terrain")
+
+        # Layer 2: Physics (The Flux Potential Heatmap)
+        viewer.add_image(
+            stability,
+            name="Flux Potential (Laplacian)",
+            colormap="coolwarm",
+            opacity=0.6,
+            contrast_limits=[-TAU, TAU]
+        )
+
+        # Layer 3: Classification (The discrete Blue Sinks / Red Peaks)
+        labels_layer = viewer.add_labels(
+            classification,
+            name="Classification",
+            opacity=0.5
+        )
+
+        # Set the colors explicitly
+        labels_layer.color = {1: 'blue', -1: 'red', 0: 'transparent'}
+
+        print("Running Viewer. Check the Blue Areas (Frost Hollows) and Red Areas (Peaks).")
+        napari.run()
+    except ImportError:
+        print("Napari not installed or display not available. Visualization skipped.")
+    except Exception as e:
+        print(f"Could not launch viewer: {e}")
+
+if __name__ == "__main__":
+    main()

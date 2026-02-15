@@ -14,21 +14,25 @@ viewers, the Python-only route requires **no compilation**.
 
 ## Install dependencies
 ```bash
-pip install -r requirements.txt
+pip install -e .
 ```
 
-Recommended extras:
+Recommended extras (for tests and dev):
 ```bash
-pip install torch transformers rasterio scipy napari matplotlib numpy
+pip install -e .[test]
 ```
 
 You are now ready to run:
 
 ```bash
-python ingest.py
-python vis.py
-python diagnose.py
-python viewer.py
+# Ingest
+manifold-ingest path/to/input.tif path/to/output.mft
+
+# Physics
+python -m manifold.physics.kesm path/to/output.mft
+
+# Training
+python -m manifold.vision.topo_clip_train path/to/output.mft
 ```
 
 ---
@@ -83,7 +87,7 @@ cpp/build/Release/
 Copy it into your Python package directory:
 
 ```
-manifold/core/
+src/manifold/core/
 ```
 
 ---
@@ -107,7 +111,7 @@ Output:
 Move to your Python package:
 
 ```bash
-cp _manifold_backend*.so ../../manifold/core/
+cp _manifold_backend*.so ../../src/manifold/core/
 ```
 
 ---
@@ -125,7 +129,7 @@ make -j$(sysctl -n hw.ncpu)
 Copy resulting `.so`:
 
 ```bash
-cp _manifold_backend*.so ../../manifold/core/
+cp _manifold_backend*.so ../../src/manifold/core/
 ```
 
 ---
@@ -147,7 +151,7 @@ If it imports without error, the build succeeded.
 
 ### Step 1 — Install Python packages
 ```bash
-pip install -r requirements.txt
+pip install -e .
 ```
 
 ### Step 2 — Build backend (optional)
@@ -155,13 +159,13 @@ See section 3.
 
 ### Step 3 — Test ingest + physics
 ```bash
-python ingest.py
-python kesm.py
+manifold-ingest ...
+python -m manifold.physics.kesm ...
 ```
 
 ### Step 4 — Train TopoCLIP
 ```bash
-python topo_clip_train.py
+python -m manifold.vision.topo_clip_train ...
 ```
 
 ---
@@ -170,9 +174,9 @@ python topo_clip_train.py
 
 ### Python modules:
 ```
-manifold/core/
-manifold/physics/
-manifold/vision/
+src/manifold/core/
+src/manifold/physics/
+src/manifold/vision/
 ```
 
 ### C++ backend sources:
@@ -229,7 +233,7 @@ cmake .. -DPYBIND11_INCLUDE_DIR=/path/to/pybind11/include
 Ensure extension is placed inside:
 
 ```
-manifold/core/
+src/manifold/core/
 ```
 
 ---

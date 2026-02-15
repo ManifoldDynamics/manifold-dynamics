@@ -1,2 +1,0 @@
-[console_scripts]
-manifold-ingest = manifold.core.ingest:main

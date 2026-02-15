@@ -1,0 +1,39 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "manifold-engine"
+version = "0.1.0-alpha"
+description = "The Open Source Computational Geography Engine"
+readme = "README.md"
+authors = [
+  { name = "Manifold Dynamics", email = "research@manifold.dynamics" },
+]
+license = { text = "Apache 2.0" }
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: Apache Software License",
+    "Operating System :: OS Independent",
+]
+requires-python = ">=3.9"
+dependencies = [
+    "numpy>=1.26.0",
+    "scipy>=1.11.0",
+    "rasterio>=1.3.0",
+    "matplotlib>=3.8.0",
+    "napari",
+    "torch",
+    "transformers",
+]
+
+[project.optional-dependencies]
+test = [
+    "pytest>=7.4.0",
+]
+
+[project.scripts]
+manifold-ingest = "manifold.core.ingest:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
